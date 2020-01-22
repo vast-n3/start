@@ -11,7 +11,7 @@
     "repositories":[
         {
             "type": "vcs",
-            "url": "https://github.com/sroehrl/neoan3.git"
+            "url": "https://github.com/vast-n3/frame.git"
         }
     ],
 
@@ -29,10 +29,10 @@
     },
     "extra": {
         "installer-paths": {
-            "./frame/{$name}": [],
-            "./model/{$name}": [
-                "neoan3-model/index"
+            "./frame/vastn3": [
+                "vast-n3/frame"
             ],
+            "./model/{$name}": [],
             "./component/{$name}": []
         }
     }
