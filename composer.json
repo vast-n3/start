@@ -1,0 +1,39 @@
+{
+    "name": "vast-n3/vast-n3",
+    "description": "neoan3 with Vue, Axios, Stateless (JWT), Tailwind CSS & mailing capabilities",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "neoan",
+            "email": "neoan@neoan.us"
+        }
+    ],
+    "repositories":[
+        {
+            "type": "vcs",
+            "url": "https://github.com/sroehrl/neoan3.git"
+        }
+    ],
+
+    "require": {
+        "neoan3-apps/db": "^0",
+        "php": "^7.0",
+        "ext-json": "*",
+        "mnsami/composer-custom-directory-installer": "1.1.*",
+        "neoan3-apps/stateless": "^1.0"
+    },
+    "scripts": {
+        "post-update-cmd": [
+            "php  \"install.php\" "
+        ]
+    },
+    "extra": {
+        "installer-paths": {
+            "./frame/{$name}": [],
+            "./model/{$name}": [
+                "neoan3-model/index"
+            ],
+            "./component/{$name}": []
+        }
+    }
+}
