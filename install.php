@@ -25,7 +25,6 @@ define('CREDENTIAL_PATH', DIRECTORY_SEPARATOR . 'credentials' . DIRECTORY_SEPARA
 
 $iv3 = new InstallVastn3();
 
-
 // availability npm & neoan3
 
 $npmAvailable = $iv3->io('npm -v',"npm is either not installed or not available to the PHP user.\n");
@@ -36,11 +35,14 @@ if(!$iv3->io('neoan3 -v', $fatal)){
 }
 
 /**
- * PHP installations
+ * Installations
  * */
 
-// installation frame
+// installation frame & components
 $iv3->io('neoan3 add frame vast-n3/vastn3 https://github.com/vast-n3/vastn3.git');
+$iv3->io('neoan3 add component vast-n3/component-home https://github.com/vast-n3/component-home.git');
+$iv3->io('neoan3 add component vast-n3/component-header https://github.com/vast-n3/component-header.git');
+$iv3->setDefaultRoute('home');
 
 // install dependencies
 echo "Installing dependencies...\n";
@@ -77,14 +79,6 @@ try {
     echo "Failed handling credentials. \nPlease run 'neoan3 credentials'\n";
 }
 
-/**
- * npm / node installations
- * */
-
-if(!$npmAvailable){
-    echo "npm operations cannot be performed. Please run manually.\n";
-    exit(1);
-}
 
 // install tailwind
 $iv3->io('npm install tailwindcss');
@@ -164,6 +158,11 @@ class InstallVastn3
             }
 
         }
+    }
+    function setDefaultRoute($component){
+        $default = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'default.php');
+        $newContent = preg_replace('/\'default_ctrl\',[\w\']+\)/',"'default_ctrl', '$component')", $default);
+        file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . 'default.php', $newContent);
     }
 
     function io($execString, $warning = "Warning: Command did not return\n")
