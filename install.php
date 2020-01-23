@@ -19,7 +19,7 @@ define('CREDENTIAL_PATH', DIRECTORY_SEPARATOR . 'credentials' . DIRECTORY_SEPARA
  * End of setup part
  * */
 
-function clearOutput(&$output)
+function clearOutput(&$output): void
 {
     $output = [];
 }
@@ -51,11 +51,16 @@ function writeCredentials($credentials)
     file_put_contents(CREDENTIAL_PATH, json_encode($credentials));
 }
 
+function io($execString, &$output){
+    exec($execString, $output, $return);
+    printOutput($output);
+}
+
 // 1. make sure npm is installed & available
 exec('npm -v', $output, $return);
 if (empty($output)) {
     echo "npm is either not installed or not available to the PHP user.\n
-    Please ensure you have node & npm installed.\n\n";
+    Please run 'npm install tailwindcss' manually after ensuring you have node & npm installed.\n\n";
     exit(1);
 }
 echo "Found npm version " . $output[0] . "\n";
@@ -70,30 +75,29 @@ if (empty($output)) {
 }
 printOutput($output);
 
+// 3. install frame
+io('neoan3 add frame vast-n3/vastn3 https://github.com/vastn3.git', $output);
 
-// 3. install tailwind
-exec('npm install tailwindcss', $output, $return);
-printOutput($output);
 
-// 4. compile css
+// 4. install tailwind
+io('npm install tailwindcss', $output);
+
+// 5. compile css
 echo "Compiling CSS...\n";
-exec('npx tailwind build frame/vastn3/style.dev.css -o frame/vastn3/style.css', $output, $return);
-printOutput($output);
+io('npx tailwind build frame/vastn3/style.dev.css -o frame/vastn3/style.css', $output);
 
-// 5. install vue & axios
+// 6. install vue & axios
 echo "Installing Vue...\n";
-exec('npm i vue', $output, $return);
-exec('npm i axios', $output, $return);
-printOutput($output);
+io('npm i vue', $output);
+io('npm i axios', $output);
 
 
-// 6. install dependencies
+// 7. install dependencies
 echo "Installing dependencies...\n";
 
 foreach ($dependencies as $name => $typeLocation) {
     $execStr = 'neoan3 add ' . $typeLocation[0] . ' ' . $name . (isset($typeLocation[1]) ? ' ' . $typeLocation[1] : '');
-    exec($execStr, $output, $return);
-    printOutput($output);
+    io($execStr, $output);
 }
 
 // 7. Credentials
