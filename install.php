@@ -127,4 +127,4 @@ try {
 
 // Final text
 
-echo "\n\nThis file ( frame/vastn3/install-vastn3.php ) should not be deployed!\n\n";
+echo "\n\nThis file should not be deployed!\n\n";
