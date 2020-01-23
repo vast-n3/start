@@ -1,11 +1,13 @@
 <?php
 
+
+
 /*
  * vast-n3 installation script
  *
  * From the root of your neoan3 installation, run "php frame/vastn3/install-vastn3.php"
  *
- * Developers: set dependencies
+ * Developers: set dependencies & version
  *
  * */
 
@@ -17,106 +19,46 @@ $dependencies = [
 
 define('CREDENTIAL_PATH', DIRECTORY_SEPARATOR . 'credentials' . DIRECTORY_SEPARATOR . 'credentials.json');
 
-/*
- * End of setup part
+/**
+ * --------------- End of setup part ----------------
  * */
 
-function clearOutput(&$output): void
-{
-    $output = [];
-}
+$iv3 = new InstallVastn3();
 
-function printOutput(&$output)
-{
-    foreach ($output as $line) {
-        echo $line . "\n";
-    }
-    clearOutput($output);
-}
 
-function randomString()
-{
-    return mb_substr(bin2hex(random_bytes(32)), 0, 32);
-}
+// availability npm & neoan3
 
-function getCredentials()
-{
-    if (file_exists(CREDENTIAL_PATH)) {
-        return json_decode(file_get_contents(CREDENTIAL_PATH), true);
-    } else {
-        return [];
-    }
-}
+$npmAvailable = $iv3->io('npm -v',"npm is either not installed or not available to the PHP user.\n");
 
-function writeCredentials($credentials)
-{
-    file_put_contents(CREDENTIAL_PATH, json_encode($credentials));
-}
-
-function io($execString, &$output){
-    exec($execString, $output, $return);
-    printOutput($output);
-}
-
-// 1. make sure npm is installed & available
-exec('npm -v', $output, $return);
-if (empty($output)) {
-    echo "npm is either not installed or not available to the PHP user.\n
-    Please run 'npm install tailwindcss' manually after ensuring you have node & npm installed.\n\n";
+$fatal = "neoan3-cli is not available to PHP. Please check PATH & permissions!";
+if(!$iv3->io('neoan3 -v', $fatal)){
     exit(1);
 }
-echo "Found npm version " . $output[0] . "\n";
-clearOutput($output);
 
-// 2. make sure neoan3 is installed & available
-exec('neoan3 -v', $output, $return);
-if (empty($output)) {
-    echo "neoan3 is either not installed or not available to the PHP user.\n
-    Please run 'npm install neoan3-cli -g' manually after ensuring you have node & npm installed.\n\n";
-    exit(1);
-}
-printOutput($output);
+/**
+ * PHP installations
+ * */
 
-// 3. install frame
-io('neoan3 add frame vast-n3/vastn3 https://github.com/vast-n3/vastn3.git', $output);
+// installation frame
+$iv3->io('neoan3 add frame vast-n3/vastn3 https://github.com/vast-n3/vastn3.git');
 
-
-// 4. install tailwind
-io('npm install tailwindcss', $output);
-
-// 5. compile css
-echo "Compiling CSS...\n";
-io('npx tailwind build frame/vastn3/style.dev.css -o frame/vastn3/style.css', $output);
-
-// 6. install vue & axios
-echo "Installing Vue...\n";
-io('npm i vue', $output);
-io('npm i axios', $output);
-
-
-// 7. install dependencies
+// install dependencies
 echo "Installing dependencies...\n";
 
 foreach ($dependencies as $name => $typeLocation) {
     $execStr = 'neoan3 add ' . $typeLocation[0] . ' ' . $name . (isset($typeLocation[1]) ? ' ' . $typeLocation[1] : '');
-    io($execStr, $output);
+    $iv3->io($execStr);
 }
 
-// 8. create template
-if(!is_dir(__DIR__ . '/_template')){
-    mkdir(__DIR__ . '/template');
-}
-foreach(['ce.html','ce.js','route.php'] as $templateFile){
-    $content = file_get_contents('https://raw.githubusercontent.com/vast-n3/start/' . $installerVersion . '/templates/' . $templateFile);
-    file_put_contents(__DIR__ . '/_template/' . $templateFile, $content);
-}
+// create template-folder
+$iv3->writeTemplates($installerVersion);
 
 
-// 9. Credentials
+// credentials
 try {
-    $credentials = getCredentials();
+    $credentials = $iv3->getCredentials();
     if (!isset($credentials['salts']['vastn3'])) {
-        $credentials['salts']['vastn3'] = randomString();
+        $credentials['salts']['vastn3'] = $iv3->randomString();
     }
     if (!isset($credentials['vastn3_db'])) {
         $credentials['vastn3_db'] = [
@@ -130,13 +72,113 @@ try {
     }
     echo "\nPlease verify correct credentials for your database by running 'neoan3 credentials' (used namespace is 'vastn3_db') \n";
     // write to store
-    writeCredentials($credentials);
+    $iv3->writeCredentials($credentials);
 } catch (Exception $e) {
     echo "Failed handling credentials. \nPlease run 'neoan3 credentials'\n";
+}
+
+/**
+ * npm / node installations
+ * */
+
+if(!$npmAvailable){
+    echo "npm operations cannot be performed. Please run manually.\n";
     exit(1);
 }
 
+// install tailwind
+$iv3->io('npm install tailwindcss');
 
-// Final text
+// compile css
+echo "Compiling CSS...\n";
+$iv3->io('npx tailwind build frame/vastn3/style.dev.css -o frame/vastn3/style.css');
 
-echo "\n\nThis file should not be deployed!\n\n";
+// install axios & vue
+$iv3->io('npm i vue');
+$iv3->io('npm i axios');
+
+// finally, start server
+
+echo "You can stop this script or wait for the testing environment to start (4 seconds).\n";
+sleep(4);
+$iv3->run();
+
+
+
+/**
+ *  Installation class
+ */
+
+class InstallVastn3
+{
+    private array $output;
+
+    function __construct()
+    {
+        $this->output = [];
+    }
+
+    function clearOutput()
+    {
+        $this->output = [];
+    }
+
+    function printOutput()
+    {
+        foreach ($this->output as $line) {
+            echo $line . "\n";
+        }
+        $this->clearOutput();
+    }
+
+    function randomString()
+    {
+        return mb_substr(bin2hex(random_bytes(32)), 0, 32);
+    }
+
+    function getCredentials()
+    {
+        if (file_exists(CREDENTIAL_PATH)) {
+            return json_decode(file_get_contents(CREDENTIAL_PATH), true);
+        } else {
+            return [];
+        }
+    }
+
+    function writeCredentials($credentials)
+    {
+        file_put_contents(CREDENTIAL_PATH, json_encode($credentials));
+    }
+    function writeTemplates($tag){
+        if (!is_dir(__DIR__ . '/_template')) {
+            mkdir(__DIR__ . '/_template');
+        }
+        foreach (['ce.html', 'ce.js', 'route.php'] as $templateFile) {
+            try{
+                $content = file_get_contents(
+                    'https://raw.githubusercontent.com/vast-n3/start/' . $tag . '/templates/' . $templateFile
+                );
+                file_put_contents(__DIR__ . '/_template/' . $templateFile, $content);
+            } catch (Exception $e){
+                echo "\n" . $templateFile ." not found.\n";
+            }
+
+        }
+    }
+
+    function io($execString, $warning = "Warning: Command did not return\n")
+    {
+        exec($execString, $this->output, $return);
+        if(empty($this->output)){
+            $this->clearOutput();
+            echo $warning;
+            return false;
+        }
+        $this->printOutput();
+        return true;
+    }
+    function run(){
+        exec('php -S localhost:8080 _neoan/server.php');
+        exit();
+    }
+}
