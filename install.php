@@ -9,6 +9,8 @@
  *
  * */
 
+$installerVersion = 'master';
+
 $dependencies = [
     'neoan3-model/user' => ['model', 'https://github.com/sroehrl/neoan3-userModel.git']
 ];
@@ -100,7 +102,17 @@ foreach ($dependencies as $name => $typeLocation) {
     io($execStr, $output);
 }
 
-// 7. Credentials
+// 8. create template
+if(!is_dir(__DIR__ . '/_template')){
+    mkdir(__DIR__ . '/template');
+}
+foreach(['ce.html','ce.js','route.php'] as $templateFile){
+    $content = file_get_contents('https://raw.githubusercontent.com/vast-n3/start/' . $installerVersion . '/templates/' . $templateFile);
+    file_put_contents(__DIR__ . '/_template/' . $templateFile, $content);
+}
+
+
+// 9. Credentials
 try {
     $credentials = getCredentials();
     if (!isset($credentials['salts']['vastn3'])) {
