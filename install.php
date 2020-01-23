@@ -70,10 +70,6 @@ if (empty($output)) {
 }
 printOutput($output);
 
-// install neoan3
-
-exec('neoan3 new app', $output,$return);
-printOutput($output);
 
 // 3. install tailwind
 exec('npm install tailwindcss', $output, $return);
