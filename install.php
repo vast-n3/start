@@ -76,7 +76,7 @@ if (empty($output)) {
 printOutput($output);
 
 // 3. install frame
-io('neoan3 add frame vast-n3/vastn3 https://github.com/vastn3.git', $output);
+io('neoan3 add frame vast-n3/vastn3 https://github.com/vast-n3/vastn3.git', $output);
 
 
 // 4. install tailwind
