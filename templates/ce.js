@@ -1,3 +1,3 @@
-Vue.component('{{name}}', {
-    template: document.querySelector('#{{name}}')
+Vue.component('{{name.camel}}', {
+    template: document.querySelector('#{{name.camel}}')
 });
