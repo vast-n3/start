@@ -4,7 +4,7 @@ namespace Neoan3\Components;
 
 use Neoan3\Frame\Vastn3;
 
-class {{name}} extends Main
+class {{name}} extends Vastn3
 {
     function init()
     {
