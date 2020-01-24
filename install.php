@@ -12,12 +12,12 @@ $installerVersion = 'master';
 
 $neoanComponents = [
     'vast-n3/vastn3' => ['frame', 'https://github.com/vast-n3/vastn3.git'],
-    'vast-n3/home' => ['frame', 'https://github.com/vast-n3/component-home.git'],
-    'vast-n3/header' => ['frame', 'https://github.com/vast-n3/component-header.git'],
+    'vast-n3/home' => ['component', 'https://github.com/vast-n3/component-home.git'],
+    'vast-n3/header' => ['component', 'https://github.com/vast-n3/component-header.git'],
     'neoan3-model/user' => ['model', 'https://github.com/sroehrl/neoan3-userModel.git']
 ];
 
-$npmPackages = ['vue', 'axios', 'tailwindcss', 'postcss', 'autoprefixer', 'postcss-import'];
+$npmPackages = ['vue', 'axios', 'tailwindcss', 'postcss', 'postcss-cli', 'autoprefixer', 'postcss-import'];
 
 $placedFiles = [];
 
@@ -72,6 +72,7 @@ foreach ($neoanComponents as $name => $typeLocation) {
     $iv3->io($execStr);
 }
 
+
 // credentials
 try {
     $credentials = $iv3->getCredentials();
@@ -105,7 +106,7 @@ foreach ($npmPackages as $package) {
 
 // compile css
 echo "Compiling ...\n";
-$iv3->io('npm build');
+$iv3->io('npm run build');
 
 // fund us:
 
@@ -113,7 +114,7 @@ $iv3->io('npm build');
 
 // done
 
-echo "\nAll done.\nYou can run 'php -S localhost:8080 _neoan/server.php'";
+echo "\nAll done.\nYou can run 'php -S localhost:8080 _neoan/server.php'\n\n";
 
 
 /**
@@ -168,7 +169,7 @@ class InstallVastn3
             $folder = (count($folder) > 0 ? implode('/', $folder) : '/');
 
             if (!is_dir($folder)) {
-                mkdir($folder, 775, true);
+                mkdir($folder, null, true);
             }
             try {
                 $content = file_get_contents($file['src']);
