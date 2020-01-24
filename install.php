@@ -166,10 +166,9 @@ class InstallVastn3
             $folder = explode('/', $file['target']);
             array_pop($folder);
             $folder = (count($folder) > 0 ? implode('/', $folder) : '/');
-            echo "$folder\n";
 
             if (!is_dir($folder)) {
-                mkdir($folder, 755, true);
+                mkdir($folder, 775, true);
             }
             try {
                 $content = file_get_contents($file['src']);
