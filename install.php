@@ -2,8 +2,7 @@
 
 /*
  * vast-n3 installation script
- *
- * From the root of your neoan3 installation, run "php frame/vastn3/install-vastn3.php"
+ * GPL v3
  *
  * Developers: set dependencies & version
  *
@@ -24,13 +23,13 @@ $placedFiles = [];
 
 foreach (['package.json', 'postcss.config.js', 'tailwind.config.js'] as $file){
     $placedFiles[] = [
-        'src' => 'https://raw.githubusercontent.com/vast-n3/' . $installerVersion . '/configs/' . $file,
+        'src' => 'https://raw.githubusercontent.com/vast-n3/start/' . $installerVersion . '/configs/' . $file,
         'target' => $file
     ];
 }
 foreach (['ce.html', 'ce.js', 'route.php'] as $file) {
     $placedFiles[] = [
-        'src' => 'https://raw.githubusercontent.com/vast-n3/' . $installerVersion . '/templates/' . $file,
+        'src' => 'https://raw.githubusercontent.com/vast-n3/start/' . $installerVersion . '/templates/' . $file,
         'target' => '_template/' . $file
     ];
 }
@@ -99,6 +98,7 @@ try {
 
 // install npm dependencies
 foreach ($npmPackages as $package) {
+    echo "\ninstalling " . $package . "\n";
     $iv3->io('npm install ' . $package);
 }
 
@@ -165,7 +165,6 @@ class InstallVastn3
         foreach ($fileArray as $file) {
             $folder = explode('/', $file['target']);
             array_pop($folder);
-            print_r($folder);
             $folder = (count($folder) > 0 ? implode('/', $folder) : '/');
             echo "$folder\n";
 
