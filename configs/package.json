@@ -1,0 +1,33 @@
+{
+  "name": "vast-n3",
+  "version": "1.0.0",
+  "description": "PHP7",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "postcss frame/vastn3/css/_index.css -o frame/vastn3/style.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vast-n3/start.git"
+  },
+  "keywords": [
+    "neoan3",
+    "vast-n3",
+    "php"
+  ],
+  "author": "Stefan Roehrl",
+  "license": "GPL-v3",
+  "bugs": {
+    "url": "https://github.com/vast-n3/start/issues"
+  },
+  "homepage": "https://github.com/vast-n3/start#readme",
+  "dependencies": {
+    "autoprefixer": "^9.7.4",
+    "axios": "^0.19.2",
+    "postcss-cli": "^7.1.0",
+    "postcss-import": "^12.0.1",
+    "tailwindcss": "^1.1.4",
+    "vue": "^2.6.11"
+  }
+}
