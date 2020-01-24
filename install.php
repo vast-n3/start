@@ -1,7 +1,5 @@
 <?php
 
-
-
 /*
  * vast-n3 installation script
  *
@@ -13,9 +11,29 @@
 
 $installerVersion = 'master';
 
-$dependencies = [
+$neoanComponents = [
+    'vast-n3/vastn3' => ['frame', 'https://github.com/vast-n3/vastn3.git'],
+    'vast-n3/home' => ['frame', 'https://github.com/vast-n3/component-home.git'],
+    'vast-n3/header' => ['frame', 'https://github.com/vast-n3/component-header.git'],
     'neoan3-model/user' => ['model', 'https://github.com/sroehrl/neoan3-userModel.git']
 ];
+
+$npmPackages = ['vue', 'axios', 'tailwindcss', 'postcss', 'autoprefixer', 'postcss-import'];
+
+$placedFiles = [];
+
+foreach (['package.json', 'postcss.config.js', 'tailwind.config.js'] as $file){
+    $placedFiles[] = [
+        'src' => 'https://raw.githubusercontent.com/vast-n3/' . $installerVersion . '/configs/' . $file,
+        'target' => $file
+    ];
+}
+foreach (['ce.html', 'ce.js', 'route.php'] as $file) {
+    $placedFiles[] = [
+        'src' => 'https://raw.githubusercontent.com/vast-n3/' . $installerVersion . '/templates/' . $file,
+        'target' => '_template/' . $file
+    ];
+}
 
 define('CREDENTIAL_PATH', DIRECTORY_SEPARATOR . 'credentials' . DIRECTORY_SEPARATOR . 'credentials.json');
 
@@ -27,10 +45,11 @@ $iv3 = new InstallVastn3();
 
 // availability npm & neoan3
 
-$npmAvailable = $iv3->io('npm -v',"npm is either not installed or not available to the PHP user.\n");
+echo "NPM check: ";
+$npmAvailable = $iv3->io('npm -v', "npm is either not installed or not available to the PHP user.\n");
 
 $fatal = "neoan3-cli is not available to PHP. Please check PATH & permissions!";
-if(!$iv3->io('neoan3 -v', $fatal)){
+if (!$iv3->io('neoan3 -v', $fatal)) {
     exit(1);
 }
 
@@ -38,23 +57,21 @@ if(!$iv3->io('neoan3 -v', $fatal)){
  * Installations
  * */
 
-// installation frame & components
-$iv3->io('neoan3 add frame vast-n3/vastn3 https://github.com/vast-n3/vastn3.git');
-$iv3->io('neoan3 add component vast-n3/home https://github.com/vast-n3/component-home.git');
-$iv3->io('neoan3 add component vast-n3/header https://github.com/vast-n3/component-header.git');
+// add files
+
+$iv3->writeFiles($placedFiles);
+
+// set home
+
 $iv3->setDefaultRoute('home');
 
 // install dependencies
 echo "Installing dependencies...\n";
 
-foreach ($dependencies as $name => $typeLocation) {
+foreach ($neoanComponents as $name => $typeLocation) {
     $execStr = 'neoan3 add ' . $typeLocation[0] . ' ' . $name . (isset($typeLocation[1]) ? ' ' . $typeLocation[1] : '');
     $iv3->io($execStr);
 }
-
-// create template-folder
-$iv3->writeTemplates($installerVersion);
-
 
 // credentials
 try {
@@ -80,29 +97,28 @@ try {
 }
 
 
-// install tailwind
-$iv3->io('npm install tailwindcss');
+// install npm dependencies
+foreach ($npmPackages as $package) {
+    $iv3->io('npm install ' . $package);
+}
+
 
 // compile css
-echo "Compiling CSS...\n";
-$iv3->io('npx tailwind build frame/vastn3/style.dev.css -o frame/vastn3/style.css');
+echo "Compiling ...\n";
+$iv3->io('npm build');
 
-// install axios & vue
-$iv3->io('npm i vue');
-$iv3->io('npm i axios');
+// fund us:
 
-// finally, start server
+// bobby's awesome fundme page
 
-echo "You can stop this script or wait for the testing environment to start (4 seconds).\n";
-sleep(4);
-$iv3->run();
+// done
 
+echo "\nAll done.\nYou can run 'php -S localhost:8080 _neoan/server.php'";
 
 
 /**
  *  Installation class
  */
-
 class InstallVastn3
 {
     private array $output;
@@ -143,32 +159,39 @@ class InstallVastn3
     {
         file_put_contents(CREDENTIAL_PATH, json_encode($credentials));
     }
-    function writeTemplates($tag){
-        if (!is_dir(__DIR__ . '/_template')) {
-            mkdir(__DIR__ . '/_template');
-        }
-        foreach (['ce.html', 'ce.js', 'route.php'] as $templateFile) {
-            try{
-                $content = file_get_contents(
-                    'https://raw.githubusercontent.com/vast-n3/start/' . $tag . '/templates/' . $templateFile
-                );
-                file_put_contents(__DIR__ . '/_template/' . $templateFile, $content);
-            } catch (Exception $e){
-                echo "\n" . $templateFile ." not found.\n";
-            }
 
+    function writeFiles($fileArray)
+    {
+        foreach ($fileArray as $file) {
+            $folder = explode('/', $file['target']);
+            array_pop($folder);
+            print_r($folder);
+            $folder = (count($folder) > 0 ? implode('/', $folder) : '/');
+            echo "$folder\n";
+
+            if (!is_dir($folder)) {
+                mkdir($folder, 755, true);
+            }
+            try {
+                $content = file_get_contents($file['src']);
+                file_put_contents($file['target'], $content);
+            } catch (Exception $e) {
+                echo "\n" . $file['src'] . " not found.\n";
+            }
         }
     }
-    function setDefaultRoute($component){
+
+    function setDefaultRoute($component)
+    {
         $default = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'default.php');
-        $newContent = preg_replace('/\'default_ctrl\',[\w\']+\)/',"'default_ctrl', '$component')", $default);
+        $newContent = preg_replace('/\'default_ctrl\',[\w\']+\)/', "'default_ctrl', '$component')", $default);
         file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . 'default.php', $newContent);
     }
 
     function io($execString, $warning = "Warning: Command did not return\n")
     {
         exec($execString, $this->output, $return);
-        if(empty($this->output)){
+        if (empty($this->output)) {
             $this->clearOutput();
             echo $warning;
             return false;
@@ -176,8 +199,5 @@ class InstallVastn3
         $this->printOutput();
         return true;
     }
-    function run(){
-        exec('php -S localhost:8080 _neoan/server.php');
-        exit();
-    }
+
 }
