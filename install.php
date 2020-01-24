@@ -40,8 +40,8 @@ if(!$iv3->io('neoan3 -v', $fatal)){
 
 // installation frame & components
 $iv3->io('neoan3 add frame vast-n3/vastn3 https://github.com/vast-n3/vastn3.git');
-$iv3->io('neoan3 add component vast-n3/component-home https://github.com/vast-n3/component-home.git');
-$iv3->io('neoan3 add component vast-n3/component-header https://github.com/vast-n3/component-header.git');
+$iv3->io('neoan3 add component vast-n3/home https://github.com/vast-n3/component-home.git');
+$iv3->io('neoan3 add component vast-n3/header https://github.com/vast-n3/component-header.git');
 $iv3->setDefaultRoute('home');
 
 // install dependencies
