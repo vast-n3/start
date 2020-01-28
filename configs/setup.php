@@ -35,6 +35,11 @@ try {
     echo "Failed handling credentials. \nPlease run 'neoan3 credentials' after installation\n";
 }
 
+// rename me
+if(strpos(__FILE__, 'configs') === false){
+    rename(__FILE__, __FILE__ . '_');
+}
+
 class mailCredentials
 {
     function __construct()
