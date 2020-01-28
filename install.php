@@ -18,8 +18,11 @@ $vastComponents = ['home', 'header', 'register', 'login', 'modal', 'email', 'ani
 
 $npmPackages = ['vue', 'axios', 'tailwindcss', 'postcss', 'postcss-cli', 'autoprefixer', 'postcss-import'];
 
-// frame
-$neoanComponents = ['vast-n3/vastn3' => ['frame', 'https://github.com/vast-n3/vastn3.git']];
+// frame & user
+$neoanComponents = [
+    'vast-n3/vastn3' => ['frame', 'https://github.com/vast-n3/vastn3.git'],
+    'neoan3-model/user' => ['model', 'https://github.com/sroehrl/neoan3-userModel.git']
+];
 
 // _template files
 foreach (['ce.html', 'ce.js', 'route.php'] as $file) {
