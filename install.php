@@ -46,8 +46,6 @@ foreach ($vastComponents as $vastComponent) {
 
 
 
-$placedFiles = [];
-
 foreach (['package.json', 'postcss.config.js', 'tailwind.config.js'] as $file) {
     $placedFiles[] = [
         'src' => 'https://raw.githubusercontent.com/vast-n3/start/' . $installerVersion . '/configs/' . $file,
@@ -100,10 +98,19 @@ try{
         $credentials['salts']['vastn3'] = $iv3->randomString();
     }
     // database credentials
-    $credentials['vastn3_db'] = new databaseCredentials();
+    if(!isset($credentials['vastn3_db'])){
+        $credentials['vastn3_db'] = new databaseCredentials();
+    } else {
+        echo "\nNOTE: neoan3 already holds database credentials for vastn3_db. You can change them by running 'neoan3 credentials' after installation.\n";
+    }
+
 
     // mail credentials
-    $credentials['vastn3_mail'] = new mailCredentials();
+    if(!isset($credentials['vastn3_mail'])){
+        $credentials['vastn3_mail'] = new mailCredentials();
+    } else {
+        echo "\nNOTE: neoan3 already holds database credentials for vastn3_mail. You can change them by running 'neoan3 credentials' after installation.\n";
+    }
 
     // write...
     $iv3->writeCredentials($credentials);
@@ -184,7 +191,8 @@ class InstallVastn3
             $folder = explode('/', $file['target']);
             array_pop($folder);
             $folder = (count($folder) > 0 ? implode('/', $folder) : '/');
-
+            print_r($file);
+            echo $folder .' - ';
             if (!is_dir($folder)) {
                 mkdir($folder, 0777, true);
             }
@@ -268,7 +276,7 @@ class handleCredentials
     {
         $defaults = $this->$entity();
         foreach ($defaults as $key => $value) {
-            $defaults[$key] = prompt::user("Please enter your database '$key'.", $value);
+            $defaults[$key] = prompt::user("Please enter your $entity '$key'.", $value);
         }
         return $defaults;
     }
