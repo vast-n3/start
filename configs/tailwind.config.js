@@ -6,8 +6,8 @@ module.exports = {
         primary: "var(--color-primary)",
         secondary: "var(--color-secondary)",
         success: "var(--color-success)",
-        warning: "var(--color-success)",
-        danger: "var(--color-success)",
+        warning: "var(--color-warning)",
+        danger: "var(--color-danger)",
       },
     }
   },

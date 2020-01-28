@@ -26,7 +26,7 @@ $neoanComponents = [
 ];
 
 // _template files
-foreach (['ce.html', 'ce.js', 'route.php'] as $file) {
+foreach (['ce.html', 'ce.js', 'route.php', 'ce.php'] as $file) {
     $placedFiles[] = [
         'src' => 'https://raw.githubusercontent.com/vast-n3/start/' . $installerVersion . '/templates/' . $file,
         'target' => '_template/' . $file
