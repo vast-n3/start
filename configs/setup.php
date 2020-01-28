@@ -18,7 +18,8 @@ try {
 
     // database credentials
     if (!isset($credentials['vastn3_db'])) {
-        $credentials['vastn3_db'] = new databaseCredentials();
+        $db = new databaseCredentials();
+        $credentials['vastn3_db'] = $db->credentials;
     } else {
         echo "\nNOTE: neoan3 already holds database credentials for vastn3_db. You can change them by running 'neoan3 credentials' after installation.\n";
     }
@@ -26,13 +27,15 @@ try {
 
     // mail credentials
     if (!isset($credentials['vastn3_mail'])) {
-        $credentials['vastn3_mail'] = new mailCredentials();
+        $mail = new mailCredentials();
+        $credentials['vastn3_mail'] = $mail->credentials;
     } else {
         echo "\nNOTE: neoan3 already holds database credentials for vastn3_mail. You can change them by running 'neoan3 credentials' after installation.\n";
     }
 
     // write...
-
+    var_dump($credentials);
+    die();
     $handler->writeCredentials($credentials);
 } catch (Exception $e) {
     echo "Failed handling credentials. \nPlease run 'neoan3 credentials' after installation\n";
@@ -40,20 +43,22 @@ try {
 
 // rename me
 if(strpos(__FILE__, 'configs') === false){
-    rename(__FILE__, __FILE__ . '_');
+    rename(__FILE__, __FILE__ . '_n3');
 }
 
 class mailCredentials
 {
+    public $credentials;
     function __construct()
     {
         $credentialHandler = new handleCredentials();
-        return $credentialHandler->captureCredentials('mail');
+        $this->credentials = $credentialHandler->captureCredentials('mail');
     }
 }
 
 class databaseCredentials
 {
+    public $credentials;
     function __construct()
     {
         $credentialHandler = new handleCredentials();
@@ -70,7 +75,7 @@ class databaseCredentials
             sleep(1);
         }
         $databaseCredentials['assumes_uuid'] = true;
-        return $databaseCredentials;
+        $this->credentials = $databaseCredentials;
     }
 
 }
