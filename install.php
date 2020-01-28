@@ -191,8 +191,6 @@ class InstallVastn3
             $folder = explode('/', $file['target']);
             array_pop($folder);
             $folder = (count($folder) > 0 ? implode('/', $folder) : '/');
-            print_r($file);
-            echo $folder .' - ';
             if (!is_dir($folder)) {
                 mkdir($folder, 0777, true);
             }
