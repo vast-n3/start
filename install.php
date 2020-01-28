@@ -19,6 +19,7 @@ $vastComponents = ['home', 'header', 'register', 'login', 'modal', 'email', 'ani
 $npmPackages = ['vue', 'axios', 'tailwindcss', 'postcss', 'postcss-cli', 'autoprefixer', 'postcss-import'];
 
 // frame && user-model
+
 $neoanComponents = [
     'vast-n3/vastn3' => ['frame', 'https://github.com/vast-n3/vastn3.git'],
     'neoan3-model/user' => ['model', 'https://github.com/sroehrl/neoan3-userModel.git']
@@ -41,8 +42,11 @@ define('CREDENTIAL_PATH', DIRECTORY_SEPARATOR . 'credentials' . DIRECTORY_SEPARA
  * */
 
 foreach ($vastComponents as $vastComponent) {
+
     $neoanComponents['vast-n3/' . $vastComponent] = ['component' , 'https://github.com/vast-n3/component-' . $vastComponent . '.git'];
+
 }
+
 
 
 
@@ -85,6 +89,7 @@ echo "Installing dependencies...\n";
 
 foreach ($neoanComponents as $name => $typeLocation) {
     $execStr = 'neoan3 add ' . $typeLocation[0] . ' ' . $name . (isset($typeLocation[1]) ? ' ' . $typeLocation[1] : '');
+    echo "Retrieving " . $typeLocation[0] . " " . $name . "\n";
     $iv3->io($execStr);
 }
 
@@ -97,6 +102,7 @@ try{
     if (!isset($credentials['salts']['vastn3'])) {
         $credentials['salts']['vastn3'] = $iv3->randomString();
     }
+
     // database credentials
     if(!isset($credentials['vastn3_db'])){
         $credentials['vastn3_db'] = new databaseCredentials();
@@ -113,6 +119,7 @@ try{
     }
 
     // write...
+   
     $iv3->writeCredentials($credentials);
 } catch (Exception $e){
     echo "Failed handling credentials. \nPlease run 'neoan3 credentials' after installation\n";
