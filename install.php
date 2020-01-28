@@ -112,20 +112,20 @@ $iv3->io('npm run build');
 // done
 
 echo "
-*************************************************************\n
-*\n
-*   Installation complete\n
-*\n
-*   IMPORTANT: The file 'setup.php' should never be deployed.\n
-*   Run 'php setup.php' now and delete the file afterwards.\n
-*   You can always create/edit your credentials with 'neoan3 credentials'\n
-*\n   
-*   Leave us a star at https://github.com/vast-n3/vastn3 \n
-*\n
-*   If you are in a directory outside your local host, you can develop using the command:\n
-*   'php -S localhost:8080 _neoan/server.php'\n
-*\n
-**************************************************************\n
+*************************************************************
+*
+*   Installation complete
+*
+*   IMPORTANT: The file 'setup.php' should never be deployed.
+*   Run 'php setup.php' now and delete the file afterwards.
+*   You can always create/edit your credentials with 'neoan3 credentials'
+*   
+*   Leave us a star at https://github.com/vast-n3/vastn3 
+*
+*   If you are in a directory outside your local host, you can develop using the command:
+*   'php -S localhost:8080 _neoan/server.php'
+*
+**************************************************************
 ";
 
 
