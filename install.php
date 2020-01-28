@@ -18,8 +18,11 @@ $vastComponents = ['home', 'header', 'register', 'login', 'modal', 'email', 'ani
 
 $npmPackages = ['vue', 'axios', 'tailwindcss', 'postcss', 'postcss-cli', 'autoprefixer', 'postcss-import'];
 
-// frame
-$neoanComponents = ['vast-n3/vastn3' => ['frame', 'https://github.com/vast-n3/vastn3.git']];
+// frame && user-model
+$neoanComponents = [
+    'vast-n3/vastn3' => ['frame', 'https://github.com/vast-n3/vastn3.git'],
+    'neoan3-model/user' => ['model', 'https://github.com/sroehrl/neoan3-userModel.git']
+];
 
 // _template files
 foreach (['ce.html', 'ce.js', 'route.php'] as $file) {
@@ -38,7 +41,7 @@ define('CREDENTIAL_PATH', DIRECTORY_SEPARATOR . 'credentials' . DIRECTORY_SEPARA
  * */
 
 foreach ($vastComponents as $vastComponent) {
-    $neoanComponents[] = ['vast-n3/' . $vastComponent => ['component' => 'https://github.com/vast-n3/component-' . $vastComponent . '.git']];
+    $neoanComponents['vast-n3/' . $vastComponent] = ['component' , 'https://github.com/vast-n3/component-' . $vastComponent . '.git'];
 }
 
 
@@ -91,7 +94,7 @@ foreach ($neoanComponents as $name => $typeLocation) {
 $credentials = [];
 try{
     $credentials = $iv3->getCredentials();
-    
+
     // stateless credentials
     if (!isset($credentials['salts']['vastn3'])) {
         $credentials['salts']['vastn3'] = $iv3->randomString();
@@ -101,7 +104,7 @@ try{
 
     // mail credentials
     $credentials['vastn3_mail'] = new mailCredentials();
-    
+
     // write...
     $iv3->writeCredentials($credentials);
 } catch (Exception $e){
@@ -135,13 +138,13 @@ echo "\nAll done.\nYou can run 'php -S localhost:8080 _neoan/server.php'\n\n";
  */
 class InstallVastn3
 {
-    private array $output;
+    private $output;
 
     function __construct()
     {
         $this->output = [];
     }
-    
+
 
     function clearOutput()
     {
