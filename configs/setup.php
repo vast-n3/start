@@ -34,8 +34,7 @@ try {
     }
 
     // write...
-    var_dump($credentials);
-    die();
+
     $handler->writeCredentials($credentials);
 } catch (Exception $e) {
     echo "Failed handling credentials. \nPlease run 'neoan3 credentials' after installation\n";
