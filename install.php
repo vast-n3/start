@@ -49,8 +49,7 @@ foreach ($vastComponents as $vastComponent) {
 
 
 
-
-foreach (['package.json', 'postcss.config.js', 'tailwind.config.js'] as $file) {
+foreach (['package.json', 'postcss.config.js', 'tailwind.config.js', 'setup.php'] as $file) {
     $placedFiles[] = [
         'src' => 'https://raw.githubusercontent.com/vast-n3/start/' . $installerVersion . '/configs/' . $file,
         'target' => $file
@@ -93,38 +92,6 @@ foreach ($neoanComponents as $name => $typeLocation) {
     $iv3->io($execStr);
 }
 
-// credentials
-$credentials = [];
-try{
-    $credentials = $iv3->getCredentials();
-
-    // stateless credentials
-    if (!isset($credentials['salts']['vastn3'])) {
-        $credentials['salts']['vastn3'] = $iv3->randomString();
-    }
-
-    // database credentials
-    if(!isset($credentials['vastn3_db'])){
-        $credentials['vastn3_db'] = new databaseCredentials();
-    } else {
-        echo "\nNOTE: neoan3 already holds database credentials for vastn3_db. You can change them by running 'neoan3 credentials' after installation.\n";
-    }
-
-
-    // mail credentials
-    if(!isset($credentials['vastn3_mail'])){
-        $credentials['vastn3_mail'] = new mailCredentials();
-    } else {
-        echo "\nNOTE: neoan3 already holds database credentials for vastn3_mail. You can change them by running 'neoan3 credentials' after installation.\n";
-    }
-
-    // write...
-   
-    $iv3->writeCredentials($credentials);
-} catch (Exception $e){
-    echo "Failed handling credentials. \nPlease run 'neoan3 credentials' after installation\n";
-}
-
 
 
 // install npm dependencies
@@ -144,7 +111,22 @@ $iv3->io('npm run build');
 
 // done
 
-echo "\nAll done.\nYou can run 'php -S localhost:8080 _neoan/server.php'\n\n";
+echo "
+*************************************************************\n
+*\n
+*   Installation complete\n
+*\n
+*   IMPORTANT: The file 'setup.php' should never be deployed.\n
+*   Run 'php setup.php' now and delete the file afterwards.\n
+*   You can always create/edit your credentials with 'neoan3 credentials'\n
+*\n   
+*   Leave us a star at https://github.com/vast-n3/vastn3 \n
+*\n
+*   If you are in a directory outside your local host, you can develop using the command:\n
+*   'php -S localhost:8080 _neoan/server.php'\n
+*\n
+**************************************************************\n
+";
 
 
 /**
@@ -172,26 +154,6 @@ class InstallVastn3
         }
         $this->clearOutput();
     }
-
-    function randomString()
-    {
-        return mb_substr(bin2hex(random_bytes(32)), 0, 32);
-    }
-
-    function getCredentials()
-    {
-        if (file_exists(CREDENTIAL_PATH)) {
-            return json_decode(file_get_contents(CREDENTIAL_PATH), true);
-        } else {
-            return [];
-        }
-    }
-
-    function writeCredentials($credentials)
-    {
-        file_put_contents(CREDENTIAL_PATH, json_encode($credentials));
-    }
-
     function writeFiles($fileArray)
     {
         foreach ($fileArray as $file) {
@@ -229,82 +191,4 @@ class InstallVastn3
         return true;
     }
 
-}
-class mailCredentials{
-    function __construct()
-    {
-        $credentialHandler = new handleCredentials();
-        return $credentialHandler->captureCredentials('mail');
-    }
-}
-
-class databaseCredentials{
-    function __construct()
-    {
-        $credentialHandler = new handleCredentials();
-        $databaseCredentials = $credentialHandler->captureCredentials('database');
-        mysqli_report(MYSQLI_REPORT_STRICT);
-        try {
-            $connection =
-                new mysqli($databaseCredentials['host'], $databaseCredentials['user'], $databaseCredentials['password']);
-            $connection->query('CREATE DATABASE ' . $databaseCredentials['name']);
-        } catch (mysqli_sql_exception $e) {
-            echo "Could not establish database connection. After installation, please run 'neoan3 credentials'\n";
-            sleep(1);
-        }
-        $databaseCredentials['assumes_uuid'] = true;
-        return $databaseCredentials;
-    }
-
-}
-
-class prompt
-{
-    static function user($question, $default)
-    {
-        $return = $default;
-        echo $question . " ( Default value: '$default' )\n";
-        $handle = fopen("php://stdin", "r");
-        $input = rtrim(fgets($handle));
-        if (!empty($input)) {
-            $return = $input;
-        }
-        fclose($handle);
-        return $return;
-    }
-}
-
-
-class handleCredentials
-{
-    function captureCredentials($entity)
-    {
-        $defaults = $this->$entity();
-        foreach ($defaults as $key => $value) {
-            $defaults[$key] = prompt::user("Please enter your $entity '$key'.", $value);
-        }
-        return $defaults;
-    }
-
-    private function database()
-    {
-        return [
-            'host' => 'localhost',
-            'name' => 'vastn_three',
-            'password' => '',
-            'user' => 'root'
-        ];
-    }
-    function mail(){
-        return [
-            'Username' => 'sam@vastn3.uber',
-            'Password' => 'super-secret',
-            'Host' => 'mail.example.com',
-            'Port' => 25,
-            'SMTPSecure' => 'tls',
-            'SMTPAuth' => true,
-            'From' => 'noreply@example.com',
-            'FromName' => 'vastn3-system'
-        ];
-    }
 }
