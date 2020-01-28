@@ -10,23 +10,21 @@
 
 $installerVersion = 'master';
 
-$neoanComponents = [
-    'vast-n3/vastn3' => ['frame', 'https://github.com/vast-n3/vastn3.git'],
-    'vast-n3/home' => ['component', 'https://github.com/vast-n3/component-home.git'],
-    'vast-n3/header' => ['component', 'https://github.com/vast-n3/component-header.git'],
-    'neoan3-model/user' => ['model', 'https://github.com/sroehrl/neoan3-userModel.git']
-];
+// vast-n3 components
+
+$vastComponents = ['home', 'header', 'register', 'login', 'modal', 'email', 'animation', 'introduction'];
+
+// npm packages
 
 $npmPackages = ['vue', 'axios', 'tailwindcss', 'postcss', 'postcss-cli', 'autoprefixer', 'postcss-import'];
 
-$placedFiles = [];
+// frame & user
+$neoanComponents = [
+    'vast-n3/vastn3' => ['frame', 'https://github.com/vast-n3/vastn3.git'],
+    'neoan3-model/user' => ['model', 'https://github.com/sroehrl/neoan3-userModel.git']
+];
 
-foreach (['package.json', 'postcss.config.js', 'tailwind.config.js'] as $file){
-    $placedFiles[] = [
-        'src' => 'https://raw.githubusercontent.com/vast-n3/start/' . $installerVersion . '/configs/' . $file,
-        'target' => $file
-    ];
-}
+// _template files
 foreach (['ce.html', 'ce.js', 'route.php'] as $file) {
     $placedFiles[] = [
         'src' => 'https://raw.githubusercontent.com/vast-n3/start/' . $installerVersion . '/templates/' . $file,
@@ -34,11 +32,31 @@ foreach (['ce.html', 'ce.js', 'route.php'] as $file) {
     ];
 }
 
+// credentials location
 define('CREDENTIAL_PATH', DIRECTORY_SEPARATOR . 'credentials' . DIRECTORY_SEPARATOR . 'credentials.json');
+
 
 /**
  * --------------- End of setup part ----------------
  * */
+
+foreach ($vastComponents as $vastComponent) {
+    $neoanComponents['vast-n3/' . $vastComponent] =  ['component', 'https://github.com/vast-n3/component-' . $vastComponent . '.git'];
+}
+
+
+
+$placedFiles = [];
+
+foreach (['package.json', 'postcss.config.js', 'tailwind.config.js'] as $file) {
+    $placedFiles[] = [
+        'src' => 'https://raw.githubusercontent.com/vast-n3/start/' . $installerVersion . '/configs/' . $file,
+        'target' => $file
+    ];
+}
+
+
+
 
 $iv3 = new InstallVastn3();
 
@@ -69,6 +87,7 @@ echo "Installing dependencies...\n";
 
 foreach ($neoanComponents as $name => $typeLocation) {
     $execStr = 'neoan3 add ' . $typeLocation[0] . ' ' . $name . (isset($typeLocation[1]) ? ' ' . $typeLocation[1] : '');
+    echo "Retrieving " . $typeLocation[0] . " " . $name . "\n";
     $iv3->io($execStr);
 }
 
@@ -84,12 +103,29 @@ try {
             'host' => 'localhost',
             'name' => 'vastn_three',
             'password' => '',
-            'user' => 'root'
+            'user' => 'root',
+            'assumes_uuid' => true
         ];
     } else {
-        echo "\nThe credentials 'vastn3_db' already exists.\n";
+        echo "\nThe credentials for 'vastn3_db' already exist.\n";
     }
-    echo "\nPlease verify correct credentials for your database by running 'neoan3 credentials' (used namespace is 'vastn3_db') \n";
+    if (!isset($credentials['vastn3_mail'])) {
+        $credentials['vastn3_mail'] = [
+            'Username' => 'sam@vastn3.uber',
+            'Password' => 'super-secret',
+            'Host' => 'mail.example.com',
+            'Port' => 25,
+            'SMTPSecure' => 'tls',
+            'SMTPAuth' => true,
+            'From' => 'noreply@example.com',
+            'FromName' => 'vastn3-system'
+        ];
+    } else {
+        echo "\nThe credentials for 'vastn3_mail' already exist.\n";
+    }
+    echo "\nIMPORTANT:  \n";
+    echo "\nPlease verify correct credentials for your database & mailing by running 'neoan3 credentials' after this script is done. \n";
+    sleep(1);
     // write to store
     $iv3->writeCredentials($credentials);
 } catch (Exception $e) {
@@ -122,7 +158,7 @@ echo "\nAll done.\nYou can run 'php -S localhost:8080 _neoan/server.php'\n\n";
  */
 class InstallVastn3
 {
-    private array $output;
+    private $output;
 
     function __construct()
     {
@@ -169,7 +205,7 @@ class InstallVastn3
             $folder = (count($folder) > 0 ? implode('/', $folder) : '/');
 
             if (!is_dir($folder)) {
-                mkdir($folder, null, true);
+                mkdir($folder, 0777, true);
             }
             try {
                 $content = file_get_contents($file['src']);
