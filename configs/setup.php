@@ -1,5 +1,8 @@
 <?php
 
+// credentials location
+define('CREDENTIAL_PATH', DIRECTORY_SEPARATOR . 'credentials' . DIRECTORY_SEPARATOR . 'credentials.json');
+
 // credentials
 $credentials = [];
 

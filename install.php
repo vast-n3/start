@@ -33,8 +33,6 @@ foreach (['ce.html', 'ce.js', 'route.php'] as $file) {
     ];
 }
 
-// credentials location
-define('CREDENTIAL_PATH', DIRECTORY_SEPARATOR . 'credentials' . DIRECTORY_SEPARATOR . 'credentials.json');
 
 
 /**
