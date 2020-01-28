@@ -18,7 +18,8 @@ $vastComponents = ['home', 'header', 'register', 'login', 'modal', 'email', 'ani
 
 $npmPackages = ['vue', 'axios', 'tailwindcss', 'postcss', 'postcss-cli', 'autoprefixer', 'postcss-import'];
 
-// frame & user
+// frame && user-model
+
 $neoanComponents = [
     'vast-n3/vastn3' => ['frame', 'https://github.com/vast-n3/vastn3.git'],
     'neoan3-model/user' => ['model', 'https://github.com/sroehrl/neoan3-userModel.git']
@@ -41,12 +42,13 @@ define('CREDENTIAL_PATH', DIRECTORY_SEPARATOR . 'credentials' . DIRECTORY_SEPARA
  * */
 
 foreach ($vastComponents as $vastComponent) {
-    $neoanComponents['vast-n3/' . $vastComponent] =  ['component', 'https://github.com/vast-n3/component-' . $vastComponent . '.git'];
+
+    $neoanComponents['vast-n3/' . $vastComponent] = ['component' , 'https://github.com/vast-n3/component-' . $vastComponent . '.git'];
+
 }
 
 
 
-$placedFiles = [];
 
 foreach (['package.json', 'postcss.config.js', 'tailwind.config.js'] as $file) {
     $placedFiles[] = [
@@ -91,46 +93,38 @@ foreach ($neoanComponents as $name => $typeLocation) {
     $iv3->io($execStr);
 }
 
-
 // credentials
-try {
+$credentials = [];
+try{
     $credentials = $iv3->getCredentials();
+
+    // stateless credentials
     if (!isset($credentials['salts']['vastn3'])) {
         $credentials['salts']['vastn3'] = $iv3->randomString();
     }
-    if (!isset($credentials['vastn3_db'])) {
-        $credentials['vastn3_db'] = [
-            'host' => 'localhost',
-            'name' => 'vastn_three',
-            'password' => '',
-            'user' => 'root',
-            'assumes_uuid' => true
-        ];
+
+    // database credentials
+    if(!isset($credentials['vastn3_db'])){
+        $credentials['vastn3_db'] = new databaseCredentials();
     } else {
-        echo "\nThe credentials for 'vastn3_db' already exist.\n";
+        echo "\nNOTE: neoan3 already holds database credentials for vastn3_db. You can change them by running 'neoan3 credentials' after installation.\n";
     }
-    if (!isset($credentials['vastn3_mail'])) {
-        $credentials['vastn3_mail'] = [
-            'Username' => 'sam@vastn3.uber',
-            'Password' => 'super-secret',
-            'Host' => 'mail.example.com',
-            'Port' => 25,
-            'SMTPSecure' => 'tls',
-            'SMTPAuth' => true,
-            'From' => 'noreply@example.com',
-            'FromName' => 'vastn3-system'
-        ];
+
+
+    // mail credentials
+    if(!isset($credentials['vastn3_mail'])){
+        $credentials['vastn3_mail'] = new mailCredentials();
     } else {
-        echo "\nThe credentials for 'vastn3_mail' already exist.\n";
+        echo "\nNOTE: neoan3 already holds database credentials for vastn3_mail. You can change them by running 'neoan3 credentials' after installation.\n";
     }
-    echo "\nIMPORTANT:  \n";
-    echo "\nPlease verify correct credentials for your database & mailing by running 'neoan3 credentials' after this script is done. \n";
-    sleep(1);
-    // write to store
+
+    // write...
+   
     $iv3->writeCredentials($credentials);
-} catch (Exception $e) {
-    echo "Failed handling credentials. \nPlease run 'neoan3 credentials'\n";
+} catch (Exception $e){
+    echo "Failed handling credentials. \nPlease run 'neoan3 credentials' after installation\n";
 }
+
 
 
 // install npm dependencies
@@ -164,6 +158,7 @@ class InstallVastn3
     {
         $this->output = [];
     }
+
 
     function clearOutput()
     {
@@ -203,7 +198,6 @@ class InstallVastn3
             $folder = explode('/', $file['target']);
             array_pop($folder);
             $folder = (count($folder) > 0 ? implode('/', $folder) : '/');
-
             if (!is_dir($folder)) {
                 mkdir($folder, 0777, true);
             }
@@ -235,4 +229,82 @@ class InstallVastn3
         return true;
     }
 
+}
+class mailCredentials{
+    function __construct()
+    {
+        $credentialHandler = new handleCredentials();
+        return $credentialHandler->captureCredentials('mail');
+    }
+}
+
+class databaseCredentials{
+    function __construct()
+    {
+        $credentialHandler = new handleCredentials();
+        $databaseCredentials = $credentialHandler->captureCredentials('database');
+        mysqli_report(MYSQLI_REPORT_STRICT);
+        try {
+            $connection =
+                new mysqli($databaseCredentials['host'], $databaseCredentials['user'], $databaseCredentials['password']);
+            $connection->query('CREATE DATABASE ' . $databaseCredentials['name']);
+        } catch (mysqli_sql_exception $e) {
+            echo "Could not establish database connection. After installation, please run 'neoan3 credentials'\n";
+            sleep(1);
+        }
+        $databaseCredentials['assumes_uuid'] = true;
+        return $databaseCredentials;
+    }
+
+}
+
+class prompt
+{
+    static function user($question, $default)
+    {
+        $return = $default;
+        echo $question . " ( Default value: '$default' )\n";
+        $handle = fopen("php://stdin", "r");
+        $input = rtrim(fgets($handle));
+        if (!empty($input)) {
+            $return = $input;
+        }
+        fclose($handle);
+        return $return;
+    }
+}
+
+
+class handleCredentials
+{
+    function captureCredentials($entity)
+    {
+        $defaults = $this->$entity();
+        foreach ($defaults as $key => $value) {
+            $defaults[$key] = prompt::user("Please enter your $entity '$key'.", $value);
+        }
+        return $defaults;
+    }
+
+    private function database()
+    {
+        return [
+            'host' => 'localhost',
+            'name' => 'vastn_three',
+            'password' => '',
+            'user' => 'root'
+        ];
+    }
+    function mail(){
+        return [
+            'Username' => 'sam@vastn3.uber',
+            'Password' => 'super-secret',
+            'Host' => 'mail.example.com',
+            'Port' => 25,
+            'SMTPSecure' => 'tls',
+            'SMTPAuth' => true,
+            'From' => 'noreply@example.com',
+            'FromName' => 'vastn3-system'
+        ];
+    }
 }
