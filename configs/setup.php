@@ -41,9 +41,15 @@ try {
 }
 
 // rename me
+echo "renaming myself to setup.php_n3\n";
 if(strpos(__FILE__, 'configs') === false){
     rename(__FILE__, __FILE__ . '_n3');
 }
+echo "Trying to execute migration (neoan3 migrate models up)\n";
+exec('neoan3 migrate models up', $output, $return);
+
+echo "Done. You can delete this file.\n";
+exit();
 
 class mailCredentials
 {
