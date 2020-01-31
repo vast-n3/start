@@ -13,6 +13,7 @@ module.exports = {
   },
   variants: {},
   plugins: [
-      
+    opacity: ['hover', 'focus', 'disabled'],
+    cursor: ['disabled']
   ]
 };
