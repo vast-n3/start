@@ -11,9 +11,11 @@ module.exports = {
       },
     }
   },
-  variants: {},
-  plugins: [
+  variants: {
     opacity: ['hover', 'focus', 'disabled'],
     cursor: ['disabled']
+  },
+  plugins: [
+    
   ]
 };
