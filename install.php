@@ -21,8 +21,8 @@ $npmPackages = ['vue', 'axios', 'tailwindcss', 'postcss', 'postcss-cli', 'autopr
 // frame && user-model
 
 $neoanComponents = [
-    'vast-n3/vastn3' => ['frame', 'https://github.com/vast-n3/vastn3.git'],
-    'neoan3-model/user' => ['model', 'https://github.com/sroehrl/neoan3-userModel.git']
+    'vast-n3/vastn3' => ['frame'],
+    'neoan3-model/user' => ['model']
 ];
 
 // _template files
