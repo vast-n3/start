@@ -41,7 +41,8 @@ foreach (['ce.html', 'ce.js', 'route.php', 'ce.php'] as $file) {
 
 foreach ($vastComponents as $vastComponent) {
 
-    $neoanComponents['vast-n3/' . $vastComponent] = ['component' , 'https://github.com/vast-n3/component-' . $vastComponent . '.git'];
+    $neoanComponents['vast-n3/' . $vastComponent] = ['component'];
+//    $neoanComponents['vast-n3/' . $vastComponent] = ['component' , 'https://github.com/vast-n3/component-' . $vastComponent . '.git'];
 
 }
 
